@@ -1,0 +1,288 @@
+\documentclass[compress]{beamer}
+
+\mode<presentation>
+{
+  \usetheme{Boadilla}
+  \setbeamercovered{invisible} % covered items don"t show up
+}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{url}
+
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+
+\title[Lo nuevo en Ruby 2.0]
+{\textsc{Ruby~2.0}: ¿Qué hay de nuevo, viejo?}
+
+\author[Edgardo~E.~Hames] {Edgardo~E.~Hames}
+\institute{ehames}
+
+\date{5 de abril de 2013}
+
+\subject{Computer Science}
+\keywords{Ruby 2.0, programming languages, programming}
+
+\beamerdefaultoverlayspecification{<+->}
+
+\begin{document}
+\lstset{
+	language=Ruby,
+%	frame=single,
+%	backgroundcolor=\color{lightgray},
+	tabsize=2,
+%	numbers=left,
+	numberstyle=\tiny,
+	numbersep=5pt,
+	breaklines=true,
+	showstringspaces=false,
+	basicstyle=\footnotesize,
+	identifierstyle=\color{blue},
+	keywordstyle=\bfseries,
+	commentstyle=\color{darkgreen},
+	stringstyle=\color{red},
+	morekeywords={refine, using, \%, i, I, w},
+	alsodigit={digit,_}
+}
+
+\section{}
+
+\begin{frame}
+  \titlepage{}
+\end{frame}
+
+\section{Intro}
+
+
+\begin{frame}
+	\begin{center}
+		Ruby 1.8 tiene los días contados.
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{center}
+		Múdense a Ruby 2.0 ya!
+	\end{center}
+\end{frame}
+
+\section{Paráms}
+
+\begin{frame}
+	\begin{center}
+		Parámetros con nombre\\
+		(\emph{keyword arguments})
+	\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ruby~2.0: parámetros con nombres}
+	\begin{itemize}
+		\item Podemos asociar nombres a parámetros de un método
+		\item Más descriptivos y fáciles de recordar
+		\item El orden no es relevante
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Parámetros con nombres: ejemplo}
+	\begin{lstlisting}
+	def wrap(string, before: "<", after: ">")
+	  "#{before}#{string}#{after}"
+	end
+	\end{lstlisting}
+
+	\lstset{language=bash}
+	\begin{lstlisting}
+	wrap("hello")                        #=> "<hello>"
+	wrap("hello", after:"]", before:"[") #=> "[hello]"
+	\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Ruby~1.8: simulados usando un hash}
+	Usado en Rails y otros DSLs
+	\begin{lstlisting}
+	some_method :foo => "bar"
+	\end{lstlisting}
+	
+	Claves desconocidas pasaban inadvertidas
+	\begin{lstlisting}
+	some_method :unknown => "never used"
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Ruby~2.0: mejor que un simple hash}
+	\begin{lstlisting}
+	begin
+	  wrap("hello", unknown: "]")
+	rescue ArgumentError => e
+	  e.message
+	end
+	\end{lstlisting}
+\end{frame}
+
+
+\section{Refin}
+
+\begin{frame}
+	\begin{center}
+		Refinamientos\\
+		(\emph{refinements})
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Ruby~1.8: las clases pueden modificarse}
+	Permite hacer \emph{monkey patching}.
+	\begin{lstlisting}
+	class String
+	  def reverse
+	    # hacer otra cosa
+	    self.capitalize!
+	  end
+	end
+	\end{lstlisting}
+	Contra: ensucia el entorno de las clases clientes.
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Ruby~2.0: tienen visibilidad acotada}
+	\begin{lstlisting}
+	module IncompatibleStrings
+	  refine String do
+	    def reverse
+	      # hacer otra cosa
+	      self.capitalize!
+	    end
+	  end
+	end
+	\end{lstlisting}
+	
+	\begin{lstlisting}
+	"abc".reverse                               #=> "cba"
+	using IncompatibleStrings; "abc".reverse    #=> "Abc"
+	\end{lstlisting}
+\end{frame}
+
+
+\section{Iter}
+
+\begin{frame}
+	\begin{center}
+		Iteración perezosa\\
+		(\emph{lazy iteration})
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Ruby 1.8: iteraciones sobre enumerados}
+	\begin{lstlisting}
+	(1..1_000_000).map{|i| 2*i}.first      #=> 2
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Ruby 2.0: iteración perezosa}
+	La iteración puede ser postergada usando \verb+#lazy+
+
+	\begin{lstlisting}
+	(1..1_000_000).lazy.map{|i| 2*i}.first #=> 2
+	\end{lstlisting}
+\end{frame}
+
+
+
+\section{Lit}
+
+\begin{frame}
+	\begin{center}
+	Nuevos literales
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Literal de hash}
+	\begin{lstlisting}
+	{:on => 1, :off => 2}
+	\end{lstlisting}
+	
+	se puede escribir como
+	
+	\begin{lstlisting}
+	{on: 1, off: 2}
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Arreglos de símbolos \%i y \%I}
+	Podemos crear arreglos constantes de símbolos
+	\begin{lstlisting}
+	% i{on off}   #=> [:on, :off]
+	\end{lstlisting}
+	
+	incluso con interpolación de variables
+	\begin{lstlisting}
+	s1, s2 = % w{on off}
+	% I{#{s1} #{s2}}   #=> [:on, :off]
+	\end{lstlisting}
+\end{frame}
+
+\section{Otras}
+
+\begin{frame}
+	\begin{center}
+	Otras mejoras
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{itemize}
+		\item Convención \texttt{to\_h} para convertir a hash
+		\item Nuevo motor de expresiones regulares
+		\item Module\#prepend para extender clases
+		\item UTF-8 por defecto
+		\item DTrace/TracePoint para depurar
+		\item Optimizaciones en la VM
+			\begin{itemize}
+				\item menor uso de memoria gracias a bitmap GC
+				\item \texttt{require}
+				\item operaciones de punto flotante
+				\item llamadas a métodos
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+\section{}
+
+\begin{frame}{}
+  \begin{center}
+  {\Huge ¡gracias por venir!}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Referencias}
+  \begin{itemize}
+  \item \href{http://goo.gl/WMq2a}{Ruby 2.0.0-p0 is released}
+  \item \href{http://goo.gl/9E0Tk}{NEWS for Ruby 2.0.0}
+  \item \href{http://goo.gl/IAAOF}{Ruby 2.0 (en)}
+  \item \href{http://goo.gl/W6pGK}{Ruby 2.0.0 in detail}
+  \item \href{http://goo.gl/oNC3m}{Ruby 2.0.0 by example}
+  \item \href{http://goo.gl/fbsXD}{Why you should be excited about garbage collection in Ruby 2.0}
+  \end{itemize}
+\end{frame}
+
+
+\end{document}
